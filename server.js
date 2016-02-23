@@ -29,6 +29,7 @@ var layerProviderID = process.env.LAYER_PROVIDER_ID || config.layer.provider_id;
 var layerKeyID = process.env.LAYER_KEY_ID || config.layer.key_id;
 var layerAppID = process.env.LAYER_APP_ID || config.layer.app_id;
 var privateKey = process.env.PRIVATE_KEY;
+var serverURL = config.layer.server_url;
 if (!privateKey) {
     try {
         privateKey = fs.readFileSync('layer-key.pem').toString();
@@ -38,9 +39,9 @@ if (!privateKey) {
 }
 
 app.post('/authenticate', function(req, res) {
-    var userId = req.body.user_id;
+    var accountId = req.body.account_id;
 
-    post('https://api.layer.com/nonces', {
+    post(serverURL + '/nonces', {
         headers: {
             'Accept': 'application/vnd.layer+json; version=' + api_version,
             'Content-Type': 'application/json'
@@ -48,9 +49,9 @@ app.post('/authenticate', function(req, res) {
     }).then(function(result) {
         return JSON.parse(result.body).nonce;
     }).then(function(nonce) {
-        if (!userId) {
+        if (!accountId) {
             console.log(1);
-            throw new Error({code: 400, message: 'Missing `user_id` body parameter.'});
+            throw new Error({code: 400, message: 'Missing `account_id` body parameter.'});
         }
 
         if (!layerProviderID) {
@@ -80,7 +81,7 @@ app.post('/authenticate', function(req, res) {
 
         var claim = JSON.stringify({
             iss: layerProviderID, // The Layer Provider ID
-            prn: userId, // User Identifier
+            prn: accountId, // User Identifier
             iat: currentTimeInSeconds, // Integer Time of Token Issuance 
             exp: expirationTime, // Integer Arbitrary time of Token Expiration
             nce: nonce // Nonce obtained from the Layer Client SDK
@@ -101,7 +102,7 @@ app.post('/authenticate', function(req, res) {
             throw new Error({code: 500, message: 'Couldn\'t find LAYER_APP_ID'});
         }
 
-        return post('https://api.layer.com/sessions', {
+        return post(serverURL + '/sessions', {
             body: {
                 app_id: layerAppID,
                 identity_token: identity_token
