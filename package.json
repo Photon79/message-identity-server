@@ -1,26 +1,23 @@
 {
-  "name": "dashboard-support-server",
+  "name": "messages-identity-server",
   "version": "0.0.1",
-  "description": "Support for vgg-dashboard",
-  "main": "index.js",
+  "description": "Identity server for messages based on Layer.com",
+  "private": true,
+  "directories": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node server.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/verygoodgroup/dashboard-support-server.git"
-  },
-  "author": "carlosrr@gmail.com",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/verygoodgroup/dashboard-support-server/issues"
-  },
+  "authors": [
+    "Sergey Mezentsev <photon79@gmail.com>"
+  ],
+  "license": "MIT",
   "dependencies": {
-    "express": "^4.13.3"
-  },
-  "engines": {
-    "node": "4.0.0"
-  },
-  "homepage": "https://github.com/verygoodgroup/dashboard-support-server#readme"
+    "body-parser": "*",
+    "denodeify": "*",
+    "es6-promise": "*",
+    "express": "*",
+    "jsrsasign": "*",
+    "parser-yaml": "^0.1.1",
+    "request": "*"
+  }
 }
