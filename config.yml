@@ -3,3 +3,4 @@ layer:
   app_id: 'layer:///apps/staging/efbcf08c-d6ea-11e5-aaf6-b68b07004518'
   key_id: 'layer:///keys/f7d715ec-d6f2-11e5-aaf6-b68b07004518'
   provider_id: 'layer:///providers/efbb827e-d6ea-11e5-aaf6-b68b07004518'
+  server_url: 'https://api.layer.com'
