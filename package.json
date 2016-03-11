@@ -5,7 +5,7 @@
   "private": true,
   "directories": {},
   "scripts": {
-    "start": "node server.js"
+    "start": "coffee server.coffee"
   },
   "authors": [
     "Sergey Mezentsev <photon79@gmail.com>"
@@ -13,11 +13,9 @@
   "license": "MIT",
   "dependencies": {
     "body-parser": "*",
-    "denodeify": "*",
-    "es6-promise": "*",
     "express": "*",
-    "jsrsasign": "*",
-    "parser-yaml": "^0.1.1",
-    "request": "*"
+    "layer-api": "^2.1.0",
+    "multer": "^1.1.0",
+    "parser-yaml": "^0.1.1"
   }
 }

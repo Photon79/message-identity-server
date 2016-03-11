@@ -1,6 +1,6 @@
 layer:
-  api_version: '1.0'
+  api_token: 'a8YBCeseirqVK13rZJrzNoaFlp6qXKUX8jyqANa0rTVDhXs6'
   app_id: 'layer:///apps/staging/efbcf08c-d6ea-11e5-aaf6-b68b07004518'
-  key_id: 'layer:///keys/f7d715ec-d6f2-11e5-aaf6-b68b07004518'
-  provider_id: 'layer:///providers/efbb827e-d6ea-11e5-aaf6-b68b07004518'
   server_url: 'https://api.layer.com'
+vgg:
+  api_url: 'https://api-test.payline.io'
