@@ -2,8 +2,10 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const LayerAPI = require('layer-api');
 const config = require('./config');
+const cors   = require('./cors');
 
 const app = express();
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
