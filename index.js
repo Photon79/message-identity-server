@@ -1,13 +1,21 @@
+const bodyParser = require('body-parser');
 const express = require('express');
+const LayerAPI = require('layer-api');
+const config = require('./config');
+
 const app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
-app.set('port', (process.env.PORT || 5000));
-app.use(express.static(__dirname + '/public'));
+const layer = new LayerAPI(config.layer);
 
-app.get('/', function(request, response) {
-  response.send('Hello World!');
+app.get('/', (req, res) => {
+  res.send('Welcome to the sample backend for messaging system using Layer');
 });
 
-app.listen(app.get('port'), function() {
-  console.log("Node app is running at localhost:" + app.get('port'));
+require('./app/messages')(app, layer, config);
+
+const port = config.server.port
+app.listen(port, () => {
+  console.log('Express server running on localhost:%d', port);
 });
