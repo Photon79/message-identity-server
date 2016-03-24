@@ -1,17 +1,27 @@
 const axios = require('axios');
 const get = axios.get;
 const vggApiHost = require('../config').api.host;
+const layerConversationSerializer = require('../serializers/layer-conversation');
+const layerMessageSerializer = require('../serializers/layer-message');
 
 function atob(encodedString) {
   return new Buffer(encodedString, 'base64').toString('utf8');
+}
+
+function generateVggAuthorizationError(res) {
+  return (response) => {
+    res.status(response.errors[0].status).json(response);
+  };
 }
 
 function checkVggApiAuthorization(req, entityType, entityId) {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     return Promise.reject({
-      status: 403,
-      errors: [ "Authorization header isn't present" ],
+      errors: [{
+        status: 403,
+        detail: "Authorization header isn't present",
+      }],
     });
   }
 
@@ -23,16 +33,21 @@ function checkVggApiAuthorization(req, entityType, entityId) {
     },
   };
   return get(`${vggApiHost}/applications`, props)
-    .then(function(result) {
+    .then((result) => {
       const parsedAuthorization = atob(authHeader.split(' ')[1]).split(':');
       return {
         userId: parsedAuthorization[0],
         password: parsedAuthorization[1]
       };
-    }, function(errorResponse) {
+    }, (errorResponse) => {
+      const errors = errorResponse.data._embedded.errors;
       return Promise.reject({
-        status: errorResponse.status,
-        messages: errorResponse.data._embedded.errors.map(error => error.message),
+        errors: errors.map(error => {
+          return {
+            status: errorResponse.status,
+            detail: error.message,
+          };
+        }),
       });
     });
 }
@@ -44,11 +59,32 @@ module.exports = function(app, layer) {
         const userId = result.userId;
         return layer.conversations.getAllFromUserAsync(userId)
           .then(function(result) {
-            return res.status(result.status).json(result.body);
+            res.status(200).json({
+              data: result.body.map(layerConversationSerializer),
+            });
           }, function(err) {
-            return res.status(err.status).json(err.body);
+            res.status(err.status).json(err.body);
           });
-      }, (error => res.status(error.status).json({ messages: error.messages })));
+      }, generateVggAuthorizationError(res));
+  });
+
+  app.get('/conversations/:conversationId/messages', function(req, res) {
+    const conversationId = req.params.conversationId;
+    checkVggApiAuthorization(req)
+      .then(vggResult => {
+        layer.messages
+          .getAllAsync(conversationId, {
+            page_size: 50,
+            sort_by: 'last_message'
+          })
+          .then(function(result) {
+            res.status(result.status).json({
+              data: result.body.map(layerMessageSerializer),
+            });
+          }, function(err) {
+            res.status(err.status).json(err.body);
+          });
+      }, generateVggAuthorizationError(res));
   });
 
   app.post('/conversations/:entityType/:entityId', function(req, res) {
@@ -70,10 +106,12 @@ module.exports = function(app, layer) {
             return layer.messages.sendTextFromUserAsync(result.body.id, userId, req.body.message);
           })
           .then(function(result) {
-            res.status(result.status).json(result.body);
+            res.status(result.status).json({
+              data: layerMessageSerializer(result.body),
+            });
           }, function(err) {
             res.status(err.status).json(err.body);
           });
-      }, (error => res.status(error.status).json({ messages: error.messages })));
+      }, generateVggAuthorizationError(res));
   });
 };
