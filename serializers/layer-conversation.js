@@ -17,7 +17,7 @@ function getRelationships(data) {
     messages: {
       links: {
         related: {
-          href: `conversations/${getId(data.id)}/messages`,
+          href: `/messages?conversation=${getId(data.id)}`,
         },
       },
     },
