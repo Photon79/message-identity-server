@@ -12,6 +12,7 @@ module.exports = {
 
   checkVggApiAuthorization: (req, entityType, entityId) => {
     const authHeader = req.headers.authorization;
+
     if (!authHeader) {
       return Promise.reject({
         errors: [{
@@ -21,6 +22,8 @@ module.exports = {
       });
     }
 
+    const userId = atob(authHeader.split(' ')[1]).split(':')[0];
+
     const props = {
       headers: {
         'Authorization': authHeader,
@@ -29,7 +32,7 @@ module.exports = {
       },
     };
 
-    return get(`${config.api.host}/applications`, props)
+    return get(`${config.api.host}/users/${userId}`, props)
       .then((result) => {
         const parsedAuthorization = atob(authHeader.split(' ')[1]).split(':');
 
@@ -57,7 +60,15 @@ module.exports = {
     };
   },
 
-  getLinks: (urlPrefix, offset, limit, count) => {
+  getId: (url) => {
+    return url.substr(url.lastIndexOf('/') + 1);
+  },
+
+  getConversationLinks: (urlPrefix, params) => {
+    const count = params.count;
+    const limit = params.limit;
+    const offset = params.offset;
+
     const links = {
       self: {
         href: `${urlPrefix}?limit=${limit}&offset=${offset}`
@@ -85,29 +96,25 @@ module.exports = {
     return links;
   },
 
-  getUploadURL: (origin, cid, file) => {
-    const app_uuid = config.layer.appId.split('/').slice(-1)[0];
+  getMessagesLinks: (urlPrefix, params) => {
+    const count = params.count;
+    const curId = params.id;
+    const lastId = params.lastId;
+    const limit = params.limit;
+    const strPart = curId ? `last_id=${curId}&` : '';
 
-    const url = [
-      config.layer.host,
-      'apps',
-      app_uuid,
-      'conversations',
-      cid,
-      'content'
-    ];
-
-    const headers = {
-      'Accept': 'application/vnd.layer+json; version=1.1',
-      'Authorization': `Bearer ${config.layer.token}`,
-      'Content-Type': 'application/json',
-      'Upload-Content-Type': file.mimetype,
-      'Upload-Content-Length': file.size,
-      'Upload-Origin': origin,
+    const links = {
+      self: {
+        href: `${urlPrefix}?${strPart}limit=${limit}`
+      }
     };
 
-    return post(url.join('/'), null, {
-      headers: headers
-    });
+    if (count === limit) {
+      links['next'] = {
+        href: `${urlPrefix}?last_id=${lastId}&limit=${limit}`
+      };
+    }
+
+    return links;
   }
 };

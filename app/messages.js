@@ -17,11 +17,16 @@ module.exports = function(app, layer, models) {
 
         layer.messages
           .getAllAsync(conversationId, params)
-          .then(function(result) {
-            console.log(result);
-
+          .then((result) => {
             res.status(result.status).json({
               data: result.body.map(layerMessageSerializer),
+
+              links: Utils.getMessagesLinks('/messages', {
+                count: result.body.length,
+                id: from_id,
+                lastId: Utils.getId(result.body.slice(-1)[0].id),
+                limit: limit
+              }),
 
               meta: {
                 count: result.headers['layer-count'],
@@ -29,7 +34,7 @@ module.exports = function(app, layer, models) {
                 limit: limit,
               }
             });
-          }, function(err) {
+          }).catch((err) => {
             res.status(err.status).json(err.body);
           });
       }).catch(Utils.generateVggAuthorizationError(res));
@@ -47,11 +52,11 @@ module.exports = function(app, layer, models) {
             user_id: userId
           },
           parts: parts
-        }).then(function(result) {
+        }).then((result) => {
           res.status(result.status).json({
             data: layerMessageSerializer(result.body),
           });
-        }).catch(function(err) {
+        }).catch((err) => {
           res.status(err.status).json(err.body);
         });
       }).catch(Utils.generateVggAuthorizationError(res));

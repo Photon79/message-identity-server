@@ -35,7 +35,11 @@ module.exports = (app, layer, models) => {
 
               res.status(200).json({
                 data: docs,
-                _links: Utils.getLinks('/conversations', offset, limit, count),
+                _links: Utils.getConversationLinks('/conversations', {
+                  count: count,
+                  limit: limit,
+                  offset: offset,
+                }),
 
                 meta: {
                   count: count,
@@ -141,24 +145,21 @@ module.exports = (app, layer, models) => {
       .then(result => {
         const file = req.files[0];
 
-        Utils.getUploadURL(req.headers.origin, req.params.cid, file)
+        layer.conversations
+          .uploadAsync(req.params.cid, file, req.headers.origin)
           .then((result) => {
-            const data = result.data;
+            const data = result.body;
 
-            axios({
-              data: file.buffer,
-              method: 'put',
-              url: data.upload_url,
-            }).then((uploadResult) => {
-              res.status(result.status).json({
-                content: {
-                  id: data.id,
-                  size: data.size
-                },
-
-                mime_type: file.mimetype
-              });
+            res.status(result.status).json({
+              content: {
+                id: data.id,
+                size: data.size
+              },
+              mime_type: file.mimetype
             });
+          })
+          .catch((err) => {
+            res.status(500).json(err);
           });
       })
       .catch(Utils.generateVggAuthorizationError(res));

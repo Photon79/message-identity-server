@@ -15,7 +15,7 @@
     "axios": "^0.9.1",
     "body-parser": "^1.15.0",
     "express": "^4.13.4",
-    "layer-api": "git@github.com:Photon79/node-layer-api.git",
+    "layer-api": "git@github.com:Photon79/node-layer-api.git#2.1.1",
     "mongoose": "^4.4.10",
     "multer": "^1.1.0"
   }

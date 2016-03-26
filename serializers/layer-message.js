@@ -1,7 +1,4 @@
-function getId(url) {
-  const urlPieces = url.split('/');
-  return urlPieces[urlPieces.length - 1];
-}
+const getId = require('../utils').getId;
 
 function getAttributes(data) {
   return {
